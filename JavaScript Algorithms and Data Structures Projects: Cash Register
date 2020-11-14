@@ -1,0 +1,83 @@
+/*JavaScript Algorithms and Data Structures Projects: Cash Register 
+https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/javascript-algorithms-and-data-structures-projects/cash-register */
+
+function checkCashRegister(price, cash, cid) {
+  //Rückgabebetrag
+  let diff = cash - price;
+  
+  //Gesamtgeldbetrag in der Kasse
+  let sum = 0;
+  for (let i = 0; i < cid.length; i++){
+    sum += cid[i][1];
+  }
+
+  //Speichere die Geldbeträge aus der Eingabe "cid" in einem neuen Array
+  let cidVal = [];
+  for (let i = 0; i < cid.length; i++){
+    cidVal.push(cid[i][1]);
+  }
+  //Umdrehen in der Aufgabenstellung gefordert
+  cidVal.reverse();
+
+  //Ordne den Bezeichnungen Zahlenwerte zu
+  const val = {
+    "ONE HUNDRED" : 100,
+    "TWENTY" : 20,
+    "TEN" : 10,
+    "FIVE" : 5,
+    "ONE" : 1,
+    "QUARTER" : 0.25,
+    "DIME" : 0.1,
+    "NICKEL" : 0.05,
+    "PENNY" : 0.01
+    };
+
+  //Array mit den Schlüsseln für obiges Objekt. Mit den Schlüsseln kann man auf die Werte zugreifen
+  const keys = Object.keys(val);
+
+  /*Im Folgenden wird das zweidimensionale Ausgabearray (outerArr) erstellt. Dieses enthält wiederum Arrays (innerArr), die die jeweilige Währung und deren ausgegebene Anzahl (count) angeben.*/
+  let count;
+  let innerArr;
+  let outerArr = [];
+  for (let i = 0; i < keys.length; i++){
+    count = 0;
+    innerArr = [];
+    /* Solange genug Münzen bzw. Scheine eines bestimmten Betrages vorhanden sind, ziehe diesen Betrag vom Inhalt der Kasse sowie vom Rückgabebetrag ab und gehe dann zur nächst kleineren Münze/Banknote */
+    while (val[keys[i]] <= diff && cidVal[i] > 0){
+      diff -= val[keys[i]];
+      diff = Math.round(diff * 100)/100;
+      cidVal[i] -= val[keys[i]];
+      cidVal[i] = Math.round(cidVal[i] * 100)/100;
+      count++;
+    }
+    // Währung, Wert
+    innerArr.push(keys[i], count*val[keys[i]]);
+    if (innerArr[1] > 0){
+      outerArr.push(innerArr);
+    }
+  }   
+
+  //retObj ist das Objekt, welches ausgegeben wird
+  let retObj = {};
+  
+  //Rückgabe gemäß Aufgabenstellung
+  if (diff > 0){
+    retObj.status = "INSUFFICIENT_FUNDS";
+    retObj.change = [];
+  } else if (
+    sum === cash - price){
+    retObj.status = "CLOSED";
+    retObj.change = cid;
+  } else {
+    retObj.status = "OPEN";
+    retObj.change = outerArr;
+  }
+  return retObj;
+}
+
+//Tests
+console.log(checkCashRegister(19.5, 20, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]]));
+
+console.log(checkCashRegister(3.26, 100, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]]));
+
+console.log(checkCashRegister(19.5, 20, [["PENNY", 0.5], ["NICKEL", 0], ["DIME", 0], ["QUARTER", 0], ["ONE", 0], ["FIVE", 0], ["TEN", 0], ["TWENTY", 0], ["ONE HUNDRED", 0]]));
